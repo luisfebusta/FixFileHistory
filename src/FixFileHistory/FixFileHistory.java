@@ -305,9 +305,11 @@ public class FixFileHistory {
     	// catch (UnsupportedOperationException e) {
         //     pv("\tsetAttributest Unsupported");
         // }
-    	Process p = Runtime.getRuntime().exec("attrib " + "" + dest.toAbsolutePath() + "" + "-A -R");
+    	String s = dest.toAbsolutePath().toString();
+    	Process p = Runtime.getRuntime().exec("attrib \"" + s + "\" -A -R");
     	try {
 			boolean success = p.waitFor(3,java.util.concurrent.TimeUnit.SECONDS);
+			pv("attributes changed " + p.exitValue());
 			return success;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
