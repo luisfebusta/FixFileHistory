@@ -24,6 +24,9 @@ public class FixFileHistory {
     private boolean v;
     private boolean t;
     private boolean r;
+    private int copied;
+    private int olderVersions;
+    private int alreadyExist;
     
     public FixFileHistory()
     {
@@ -32,6 +35,9 @@ public class FixFileHistory {
         v = false;
         t = false;
         r = false;
+        copied = 0;
+        olderVersions = 0;
+        alreadyExist = 0;
     }
     
     public void setVerbose()
@@ -48,7 +54,37 @@ public class FixFileHistory {
     {
         r = true;
     }
+    public void pvln(String txt)
+    {
+        if(v)
+            System.out.println(txt);
+    }
     
+    public void pv(String txt)
+    {
+        if(v)
+            System.out.print(txt);
+    }
+    
+    /**
+	 * @return the copied
+	 */
+	public int getCopied() {
+		return copied;
+	}
+	
+	/**
+	 * @return the not_copied
+	 */
+	public int getOlderVersions() {
+		return olderVersions;
+	}
+	
+	public int getAlreadyExists() 
+	{
+		return alreadyExist;
+	}
+	
     public void setSrc(String src)
     {
         if(src == null)
@@ -65,7 +101,7 @@ public class FixFileHistory {
             throw new IllegalArgumentException(src + " is not a directory");
         }
         this.src = tmp;
-        pv("Source Directory: " + src);
+        pvln("Source Directory: " + src);
     }
     
     public void setDst(String dest)
@@ -81,7 +117,7 @@ public class FixFileHistory {
         }
         
         this.dest = tmp;
-        pv("Destination Directory: " + dest);
+        pvln("Destination Directory: " + dest);
     }
     
     // Recursive approach, might change later if needed
@@ -110,7 +146,7 @@ public class FixFileHistory {
             //e.printStackTrace();
         } 
         
-        pv("Begin file copy");
+        pvln("Begin file copy");
         copy(this.src, this.dest);
 
     }
@@ -118,7 +154,7 @@ public class FixFileHistory {
     private void copy(Path src, Path dest)
     {
         //create destination directory;
-        pv("Creating directory " + dest);
+        pvln("Creating directory " + dest);
         
         if (Files.exists(dest) && !r)
         {
@@ -146,13 +182,12 @@ public class FixFileHistory {
             files = Files.newDirectoryStream(src, onlyFiles);
             directories = Files.newDirectoryStream(src, onlyDirs);
 
-            pv("Copying directory contents: " + src + " to " + dest);
+            pvln("Copying directory contents: " + src + " to " + dest);
             
             //Process all files first
             HashMap<String, ArrayList<Path>> fileMap = new HashMap<>();
             for (Path f: files)
             {                               
-                //TODO: handle duplicate files with different "File History Timestamps"
                 if (Files.isRegularFile(f, NOFOLLOW_LINKS) || Files.isSymbolicLink(f))
                 {
                     //figure out if filename is in File History format and remove timestamp;
@@ -174,11 +209,12 @@ public class FixFileHistory {
             
             for (Entry<String, ArrayList<Path>> ent: fileMap.entrySet())
             {
-                // TODO:  Allow timestamp selection. 
+                // TODO:  Allow timestamp selection as opposed to always restoring the most recent copy. 
                 // For now the utility just copies copy the most recent file by sorting the list of
                 // "duplicate" files.
                 Collections.sort(ent.getValue());
                 Path f = ent.getValue().get(ent.getValue().size()-1);
+                olderVersions += ent.getValue().size()-1;
                 copyFile(f,Paths.get(dest.toString(),ent.getKey())); 
                 
             }
@@ -194,6 +230,7 @@ public class FixFileHistory {
                 }
                 else
                 {
+                	// In theory this will not be reached...
                     System.out.println("ERROR: Directory "+ f.toString() + "Is not a directory");
                 }
             }
@@ -227,8 +264,15 @@ public class FixFileHistory {
     private void copyFile(Path src, Path dest)
     {
         pv("Copying file " + src + " to " + dest);
-        if (t || Files.exists(dest))
+        if (Files.exists(dest))
         {
+        	System.out.println("Skipping File " + dest.toString() + " - already Exists");
+        	alreadyExist++;
+        	return;
+        }
+        if (t)
+        {
+        	copied++;
             return;
         }
         try {
@@ -247,8 +291,10 @@ public class FixFileHistory {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (UnsupportedOperationException e) {
-            pv("setAttributest Unsupported");
+            pv("\tsetAttributest Unsupported");
         }
+        pvln(" - DONE!");
+        copied ++;
         
             
     }
@@ -261,26 +307,32 @@ public class FixFileHistory {
         System.out.println("");
         System.out.println("\tsrc_directory:\tIs the directory that contains the original files with the");
         System.out.println("\t\t\tFile History times stamp appended at the end");
+        
         System.out.println("\tdest_directory:");
         System.out.println("\t\t\tSpecifies the directory to which the files");
         System.out.println("\t\t\twith the new names will be copied to.");
         System.out.println("\t\t\tIf target_directory is specified src_directory will be left intact");
+        
         System.out.println("OPTIONS:");
+        
         System.out.println("\t-h --help\tShows this screen");
+        
+        System.out.println("\t--merge\t\tWill restore files and Directory structure that DOESN'T exist on target directory");
+        System.out.println("\t\t\twitht he resume flag, the program will navigate the directory structure");
+        
         System.out.println("\t--resume\t\tIf the programm stopped execution you can re-issue the command");
         System.out.println("\t\t\twitht he resume flag, the program will navigate the directory structure");
         System.out.println("\t\t\tand resume copying from where it left off");
+        
         System.out.println("\t-v\t\tPrints to the screen all the renames/movers as they're being done");
-        System.out.println("\t-t --test\tDoes a test run printing all the renames and moves that would");
-        System.out.println("\t\t\tbe done, but doesn't change anything (for the cautious user");
+        
+        System.out.println("\t-t --test\tDoes a test run if used with --merge, it will print out only files which would not be copied ");
+        System.out.println("\t\t\tif used with -v it would print all copy/skip operations that would be done,");
+        System.out.println("\t\t\but doesn't change anything (for the cautious user) use with ");
         System.exit(0);
     }
     
-    public void pv(String txt)
-    {
-        if(v)
-            System.out.println(txt);
-    }
+
     
     public static void main(String [] args)
     {
@@ -302,12 +354,13 @@ public class FixFileHistory {
                 case "-h":
                     printUsage();
                     break;
+                case "--merge": //fall through
                 case "--resume":
                     fn.setResume();
                     break;
                 case "-t":
                     fn.setTestRun();
-                    fn.setVerbose();
+                    //fn.setVerbose();
                     break;
                 case "-v":
                     fn.setVerbose();
@@ -340,7 +393,11 @@ public class FixFileHistory {
         
         try{
             fn.execute();
+            //TODO: maybe change println to format
             System.out.println("DONE!!!");
+            System.out.println("Files Copied:                                           \t"+fn.getCopied());
+            System.out.println("Files Not Copied because they were older versions:      \t"+fn.getOlderVersions());
+            System.out.println("Files not copied because they already existed on target:\t"+fn.getAlreadyExists());
         }
         finally
         {
@@ -348,5 +405,7 @@ public class FixFileHistory {
         }
         
     }
+
+	
 
 }
