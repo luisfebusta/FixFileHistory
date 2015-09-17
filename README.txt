@@ -47,6 +47,8 @@ HOW TO MONITOR PROGRESS:
 	Windows Task Manager (CTRL + ALT + DELETE) can be used to monitor progress. Look for the java process, you will see a high Disk usage reported for this process, which means the utility is doing it's job
 
 NOTES:
+
+	***All the copied files will have their read-only and archive attributes removed regardless of their settings prior to backing them up***
 	If for some reason the Disk % usage drops to 0% or the actions displayed with the -v flag are taking long to update, hit enter a few times on the command prompt window (That worked for me)
 
 	Lastly, it is recommended that power options are changed so that the computer doesn't go to sleep as the restore operations might take some time.
@@ -57,14 +59,19 @@ NOTES:
 	
 	I SUGGEST YOU RESTORE TO A NEW DIRECTORY AND THEN MERGE THAT DIRECTORY WITH YOUR EXISTING USER DIRECTORY
 
-SAMPLE RUN:
+SAMPLE RUNS:
 
-	C:\Users\Luis F\workspace\FixFileHistory>java -Xms4G -cp bin\ FixFileHistory.FixFileHistory -v "K:\FileHistory\Luis F\LUISANDDAYA-PC\Data\C\Users\Luis F" "C:\Users\Public\Luis F Restore"
+	C:\Users\Luis F\workspace\FixFileHistory>java -Xms4G -cp bin\ FixFileHistory.FixFileHistory -v "K:\FileHistory\Luis F\LUIS-PC\Data\C\Users\Luis F" "C:\Users\Public\Luis F Restore"
 
 	Note FixFileHistory is the root directory for the project. 
 	Also note that the -Xms defines the starting memory available to the application and can be left out.
 	In this case -Xms4G specifies 4GB. In all my runs from the command line, I haven't the utility use more than 300MB (I was just being extra careful)
 	
+	C:\Users\Luis F\workspace\FixFileHistory>java -cp bin\ FixFileHistory.FixFileHistory "K:\FileHistory\Luis F\LUIS-PC\Data\C\Users\Luis F" "C:\Users\Public\Luis F Restore"
+	
+	C:\Users\Luis F\workspace\FixFileHistory>java -cp bin\ FixFileHistory.FixFileHistory --merge "K:\FileHistory\Luis F\LUIS-PC\Data\C\Users\Luis F" "C:\Users\Luis F"
+	
+	*** Works but not recommended, see NOTES
 FUTURE ADDITIONS:
 
 	GUI front end, build file, potentially package utility into executable.
