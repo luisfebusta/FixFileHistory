@@ -35,6 +35,10 @@ OPTIONS:
 
 Future Versions: GUI front end, build file, potentially package utility into executable.
 
+SAMPLE RUN:
 
+Note FixFileHistory is the root directory for the project
+
+C:\Users\Luis F\workspace\FixFileHistory>java -Xms4G -cp bin\ FixFileHistory.FixFileHistory -v "K:\FileHistory\Luis F\LUISANDDAYA-PC\Data\C\Users\Luis F" "C:\Users\Public\Luis F Restore"
 
 
