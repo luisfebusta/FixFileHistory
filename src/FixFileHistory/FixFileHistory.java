@@ -286,17 +286,33 @@ public class FixFileHistory {
         
         //set file attributes
         try {
-            Files.setAttribute(dest, "DOS:readonly", false);
+        	if(!changeAttributes(dest))
+        	System.out.println("Couldn't modify read-only and archive attributes for file" + dest);
+           
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (UnsupportedOperationException e) {
-            pv("\tsetAttributest Unsupported");
         }
         pvln(" - DONE!");
-        copied ++;
-        
-            
+        copied ++;     
+    }
+    
+    private boolean  changeAttributes(Path dest) throws IOException
+    { 
+    	// try{
+    	//     Files.setAttribute(dest, "DOS:readonly", false);
+    	// }
+    	// catch (UnsupportedOperationException e) {
+        //     pv("\tsetAttributest Unsupported");
+        // }
+    	Process p = Runtime.getRuntime().exec("attrib " + "" + dest.toAbsolutePath() + "" + "-A -R");
+    	try {
+			boolean success = p.waitFor(3,java.util.concurrent.TimeUnit.SECONDS);
+			return success;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			return false;	
+		}
     }
      
     private static void printUsage()

@@ -3,6 +3,8 @@
 Author: Luis F. Bustamante
 contact: luisfebusta@gmail.com
 
+Use at your own risk
+
 USAGE:
 	FixNames [options] <src_directory> <dest_directory>
 
@@ -52,13 +54,17 @@ NOTES:
 	GUI front end coming in the next few weeks.
 	
 	Any questions or suggestions shoot me an email with the subject "FixFileHistory Utility"
+	
+	I SUGGEST YOU RESTORE TO A NEW DIRECTORY AND THEN MERGE THAT DIRECTORY WITH YOUR EXISTING USER DIRECTORY
 
 SAMPLE RUN:
 
-	Note FixFileHistory is the root directory for the project
-
 	C:\Users\Luis F\workspace\FixFileHistory>java -Xms4G -cp bin\ FixFileHistory.FixFileHistory -v "K:\FileHistory\Luis F\LUISANDDAYA-PC\Data\C\Users\Luis F" "C:\Users\Public\Luis F Restore"
 
+	Note FixFileHistory is the root directory for the project. 
+	Also note that the -Xms defines the starting memory available to the application and can be left out.
+	In this case -Xms4G specifies 4GB. In all my runs from the command line, I haven't the utility use more than 300MB (I was just being extra careful)
+	
 FUTURE ADDITIONS:
 
 	GUI front end, build file, potentially package utility into executable.
