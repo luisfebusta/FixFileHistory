@@ -251,7 +251,7 @@ public class FixFileHistory {
         int dot = originalName.lastIndexOf('.');
         int closeParen = originalName.lastIndexOf(')');
         int openParen = originalName.lastIndexOf('(');
-        if(openParen != -1 && closeParen != -1 && dot - closeParen == 1)
+        if(openParen != -1 && closeParen != -1 && ((dot == -1) ? true : dot - closeParen == 1))
         {
             char [] on = originalName.toCharArray();
             sb.append(on, 0, openParen-1);
